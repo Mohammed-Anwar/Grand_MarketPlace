@@ -15,12 +15,101 @@ const GameState = {
     netWorth: 50,
     offers: [],
     products: {
-        apple: { name: "Apple", emoji: "🍎", unlocked: true, minPrice: 4, maxPrice: 8, enchMin: 500, enchMax: 1000, unlockCost: 0 },
-        berry: { name: "Berry", emoji: "🍌", unlocked: false, minPrice: 10, maxPrice: 20, enchMin: 1200, enchMax: 2400, unlockCost: 150 },
-        pear: { name: "Pear", emoji: "🍐", unlocked: false, minPrice: 25, maxPrice: 50, enchMin: 3000, enchMax: 6000, unlockCost: 500 },
-        grape: { name: "Grape", emoji: "🍇", unlocked: false, minPrice: 65, maxPrice: 130, enchMin: 8000, enchMax: 15000, unlockCost: 1800 },
-        pumpkin: { name: "Pumpkin", emoji: "🎃", unlocked: false, minPrice: 160, maxPrice: 320, enchMin: 20000, enchMax: 40000, unlockCost: 6000 },
-        dragonfruit: { name: "Dragonfruit", emoji: "🐉", unlocked: false, minPrice: 420, maxPrice: 850, enchMin: 55000, enchMax: 99999, unlockCost: 20000 }
+        // --- 🍏 APPLE: The High-Volume Bulk Staple ---
+        // Personality: Tiny margins per unit, but traded in huge crates. Highly predictable and common.
+        apple: { 
+            name: "Apple", 
+            emoji: "🍎", 
+            unlocked: true, 
+            unlockCost: 0,
+            minPrice: 3, maxPrice: 9, 
+            enchMin: 500, enchMax: 1000,
+            minBatch: 20, maxBatch: 50,        // Spawns in massive quantities!
+            tierMultiplier: 1.5,  // Standard tier scaling
+            spawnWeight: 100,     // Super common in market slots
+            priceSkew: 1.0,       // Perfectly even linear price distribution
+            forgeCostRatio: 9     // Takes 9 pieces to forge
+        },
+
+        // --- 🍓 BERRY: The Volatile High-Risk Gamble ---
+        // Personality: Massive price range variance. Extremely cheap floor, massive jackpot ceiling. 
+        berry: { 
+            name: "Berry", 
+            emoji: "🍌", 
+            unlocked: false, 
+            unlockCost: 150,
+            minPrice: 4, maxPrice: 35,         // Huge spread percentage-wise
+            enchMin: 1200, enchMax: 2400,
+            minBatch: 4, maxBatch: 12,
+            tierMultiplier: 2.1,  // High payout if you successfully forge a cheap berry
+            spawnWeight: 65,      // Common
+            priceSkew: 0.6,       // Tends to sit dirt-cheap most of the time; max-price payouts are rare spikes
+            forgeCostRatio: 6     // Easier to forge up!
+        },
+
+        // --- 🍐 PEAR: The Steady Premium Asset ---
+        // Personality: Tight price margins but a very high price floor. Safe place to park your gold.
+        pear: { 
+            name: "Pear", 
+            emoji: "🍐", 
+            unlocked: false, 
+            unlockCost: 500,
+            minPrice: 30, maxPrice: 50,         // Safe, low-risk tight margins
+            enchMin: 3000, enchMax: 6000,
+            minBatch: 8, maxBatch: 20,
+            tierMultiplier: 1.6,  
+            spawnWeight: 45,      // Moderate spawn rate
+            priceSkew: 1.1,       // Naturally skews slightly towards the more expensive side
+            forgeCostRatio: 9     
+        },
+
+        // --- 🍇 GRAPE: The Crafting Special (Artisan Crop) ---
+        // Personality: Terrible to sell raw at Tier 0, but scales exponentially when forged.
+        grape: { 
+            name: "Grape", 
+            emoji: "🍇", 
+            unlocked: false, 
+            unlockCost: 1800,
+            minPrice: 65, maxPrice: 130, 
+            enchMin: 8000, enchMax: 15000,
+            minBatch: 3, maxBatch: 10,
+            tierMultiplier: 2.5,  // Legendary return-on-investment when forged to higher stars
+            spawnWeight: 25,      // Rare
+            priceSkew: 0.9,       
+            forgeCostRatio: 5     // Highly appealing to forge—only takes 5 items instead of 9!
+        },
+
+        // --- 🎃 PUMPKIN: The Heavyweight Crop ---
+        // Personality: Slow-moving, heavy asset. Massive bulk order sizes, but requires a lot of materials to refine.
+        pumpkin: { 
+            name: "Pumpkin", 
+            emoji: "🎃", 
+            unlocked: false, 
+            unlockCost: 6000,
+            minPrice: 160, maxPrice: 320, 
+            enchMin: 20000, enchMax: 40000,
+            minBatch: 12, maxBatch: 28,         // Massive payout requirements when a trade shows up
+            tierMultiplier: 1.7,  
+            spawnWeight: 12,      // Very Rare
+            priceSkew: 1.0,       
+            forgeCostRatio: 12    // Heavy and dense—takes 12 items to forge to the next star
+        },
+
+        // --- 🐉 DRAGONFRUIT: The Legendary Whale Asset ---
+        // Personality: Hyper-expensive, ultra-rare status symbol crop. High entry barrier, tiny quantities.
+        dragonfruit: { 
+            name: "Dragonfruit", 
+            emoji: "🐉", 
+            unlocked: false, 
+            unlockCost: 20000,
+            minPrice: 450, maxPrice: 950, 
+            enchMin: 55000, enchMax: 99999,
+            minBatch: 1, maxBatch: 4,          // Traded in boutique numbers
+            tierMultiplier: 1.9,  
+            spawnWeight: 4,       // Ultra Rare event asset
+            priceSkew: 1.4,       // Incredibly greedy merchants—usually spawns listed at high prices
+            forgeCostRatio: 9     
+        }
     },
     inventory: { 'apple_0': 15 },
 
