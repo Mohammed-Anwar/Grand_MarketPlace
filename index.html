@@ -16,66 +16,78 @@
 
     <!-- DOM UI CONTAINER -->
     <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <div class="header-icon">🏪</div>
-            <div class="header-text">
-                <h1>The Grand Marketplace</h1>
-                <div class="gold-bal" id="header-gold">🪙 Balance: 50g</div>
-            </div>
-            <button class="btn-menu" onclick="GameApp.openMenuModal()">⚙️ Menu</button>
-        </div>
-
-        <!-- TABS -->
-        <div class="screen-tabs">
-            <div class="screen-tab active" data-view="hub">🎒 My Hub</div>
-            <div class="screen-tab" data-view="market">⚖️ Markets</div>
-            <div class="screen-tab" data-view="upgrades">✨ Upgrades</div>
-        </div>
-
-        <!-- VIEWS -->
-        <!-- VIEW: HUB / INVENTORY -->
-        <div class="view active" id="view-hub">
-            <div class="wood-panel" style="display:none;">
-                <div class="green-ribbon">COFFER STATUS</div>
-                <div class="balance-card">
-                    <div class="balance-amount" id="hub-gold">🪙 50g</div>
-                    <div class="net-worth" id="hub-networth">Total Assets Valuation: 50g</div>
+    
+        <div class="sidebar">
+            <div class="header">
+                <div class="header-icon">🏪</div>
+                <div class="header-text">
+                    <h1>The Grand Marketplace</h1>
+                    <div class="gold-bal" id="header-gold">🪙 Balance: 50g</div>
                 </div>
+                <button class="btn-menu mobile-menu-btn" onclick="GameApp.openMenuModal()">⚙️ Menu</button>
             </div>
 
-            <div class="section-title">🎒 Inventory Contents</div>
-            <div class="inventory-grid" id="inventory-grid">
-                <!-- Populated by JS -->
+            <div class="screen-tabs">
+                <div class="screen-tab" data-view="hub">🎒 My Hub</div>
+                <div class="screen-tab active" data-view="market">⚖️ Markets</div>
+                <div class="screen-tab" data-view="upgrades">✨ Upgrades</div>
             </div>
 
-            <div class="forge-footer">
-                <div class="forge-footer-info" id="forge-selection-text">Select an item in warehouse</div>
-                <button class="btn-forge" id="btn-open-forge" disabled>🔨 Forge</button>
-            </div>
+            <button class="btn-menu desktop-menu-btn" onclick="GameApp.openMenuModal()">⚙️ Menu</button>
         </div>
 
-        <!-- VIEW: MARKET -->
-        <div class="view" id="view-market">
-            <div class="market-info-bar">
-                <button id="btn-market-tier" class="btn-shuffle"  onclick="GameApp.cycleMarketTier()">
-                    🔍 Tier: 0/0
-                </button>
-                <button class="refresh-btn" onclick="GameApp.shuffleMarket()">↻ Shuffle (-10g)</button>
+        <div class="main-content">
+            <h2 class="desktop-view-title" id="desktop-view-title">🎒 My Hub</h2>
+            
+            <div class="views-scroll-area">
+                <!-- VIEWS -->
+                <!-- VIEW: HUB / INVENTORY -->
+                <div class="view" id="view-hub">
+                    <div class="wood-panel" style="display:none;">
+                        <div class="green-ribbon">COFFER STATUS</div>
+                        <div class="balance-card">
+                            <div class="balance-amount" id="hub-gold">🪙 50g</div>
+                            <div class="net-worth" id="hub-networth">Total Assets Valuation: 50g</div>
+                        </div>
+                    </div>
+
+                    <div class="section-title">🎒 Inventory Contents</div>
+                    <div class="inventory-grid" id="inventory-grid">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div class="forge-footer">
+                        <div class="forge-footer-info" id="forge-selection-text">Select an item in warehouse</div>
+                        <button class="btn-forge" id="btn-open-forge" disabled>🔨 Forge</button>
+                    </div>
+                </div>
+
+                <!-- VIEW: MARKET -->
+                <div class="view active" id="view-market">
+                    <div class="market-info-bar">
+                        <button id="btn-market-tier" class="btn-shuffle"  onclick="GameApp.cycleMarketTier()">
+                            🔍 Tier: 0/0
+                        </button>
+                        <button class="refresh-btn" onclick="GameApp.shuffleMarket()">↻ Shuffle (-10g)</button>
+                    </div>
+
+                    <div id="market-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- VIEW: UPGRADES -->
+                <div class="view" id="view-upgrades">
+                    <div class="section-title">✨ Expand Thy Realm</div>
+                    <div id="upgrades-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
             </div>
 
-            <div id="market-list">
-                <!-- Populated by JS -->
-            </div>
         </div>
-
-        <!-- VIEW: UPGRADES -->
-        <div class="view" id="view-upgrades">
-            <div class="section-title">✨ Expand Thy Realm</div>
-            <div id="upgrades-list">
-                <!-- Populated by JS -->
-            </div>
-        </div>
+        
     </div>
 
     <!-- MAIN MENU MODAL -->

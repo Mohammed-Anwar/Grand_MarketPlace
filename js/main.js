@@ -17,6 +17,11 @@ const GameApp = {
                 tab.classList.add('active');
                 this.currentTab = tab.dataset.view;
                 document.getElementById('view-' + this.currentTab).classList.add('active');
+                
+                // NEW: Update desktop title to match tab inner text
+                const titleEl = document.getElementById('desktop-view-title');
+                if(titleEl) titleEl.innerText = tab.innerText;
+
                 this.refreshUI();
             });
         });
@@ -247,7 +252,7 @@ const GameApp = {
                 const colors = ['', 'tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-5'];
                 let starHTML = stars === 'enchanted' ? '<div class="stars enchanted">✨</div>' : (stars > 0 ? `<div class="stars ${colors[stars]}">★</div>` : '');
                 
-                div.innerHTML = `<div class="emoji-container"><span class="item-emoji">${prod.emoji}</span>${starHTML}</div><span class="item-qty">x${GameState.inventory[key]}</span>`;
+                div.innerHTML = `<div class="emoji-container"><span class="item-emoji">${prod.emoji}</span>${starHTML}</div><span class="item-qty" style="font-size: 20px;">x${GameState.inventory[key]}</span>`;
                 
                 div.onclick = () => { SoundFX.playClick(); GameState.selectedInventoryItem = key; this.renderHub(); };
                 grid.appendChild(div);
@@ -297,14 +302,15 @@ const GameApp = {
             
             list.innerHTML += `
                 <div class="market-item ${offer.type === 'SELL' ? 'sell-deal' : ''} ${isRareClass}">
-                    <div class="market-item-icon">
+                    <div class="market-item-icon" style="position: relative;">
                         ${prod.emoji}
                         ${starHTML}
+                        <div class="item-qty">x${offer.qty}</div>
                     </div>
                     <div class="market-item-info">
                         
                         <div class="market-item-name">${nameStr}</div>
-                        <div class="market-item-details" style="margin-top: 4px;">Qty available: ${offer.qty}</div>
+                        
                     </div>
                     <div class="market-price-col">
                         <div class="market-item-price">${offer.pricePerUnit}</div>
@@ -315,6 +321,7 @@ const GameApp = {
                     </button>
                 </div>`;
         });
+    
     },
 
     renderUpgrades() {
@@ -344,7 +351,7 @@ const GameApp = {
         Object.keys(GameState.products).forEach(pKey => {
             const prod = GameState.products[pKey];
             if (prod.unlockCost > 0) {
-                list.innerHTML += this.upgCardHTML(`${prod.emoji} Unchain ${prod.name}s`, prod.unlocked ? "Unlocked & active" : `Adds ${prod.name} to rotation`, prod.unlocked, prod.unlockCost, `GameApp.buyProduct('${pKey}', ${prod.unlockCost}, event)`);
+                list.innerHTML += this.upgCardHTML(`${prod.emoji} Unlock ${prod.name}s`, prod.unlocked ? "Unlocked & active" : `Adds ${prod.name} to rotation`, prod.unlocked, prod.unlockCost, `GameApp.buyProduct('${pKey}', ${prod.unlockCost}, event)`);
             }
         });
     },

@@ -16,7 +16,7 @@ const GameState = {
     offers: [],
     products: {
         apple: { name: "Apple", emoji: "🍎", unlocked: true, minPrice: 4, maxPrice: 8, enchMin: 500, enchMax: 1000, unlockCost: 0 },
-        berry: { name: "Berry", emoji: "🍓", unlocked: false, minPrice: 10, maxPrice: 20, enchMin: 1200, enchMax: 2400, unlockCost: 150 },
+        berry: { name: "Berry", emoji: "🍌", unlocked: false, minPrice: 10, maxPrice: 20, enchMin: 1200, enchMax: 2400, unlockCost: 150 },
         pear: { name: "Pear", emoji: "🍐", unlocked: false, minPrice: 25, maxPrice: 50, enchMin: 3000, enchMax: 6000, unlockCost: 500 },
         grape: { name: "Grape", emoji: "🍇", unlocked: false, minPrice: 65, maxPrice: 130, enchMin: 8000, enchMax: 15000, unlockCost: 1800 },
         pumpkin: { name: "Pumpkin", emoji: "🎃", unlocked: false, minPrice: 160, maxPrice: 320, enchMin: 20000, enchMax: 40000, unlockCost: 6000 },
