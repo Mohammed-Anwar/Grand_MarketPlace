@@ -4,25 +4,40 @@
     DOM APP CONTROLLER
 ==================================================================== */
 const GameApp = {
-    currentTab: 'market',
+    currentTab: 'hub',
     forgeBatchCount: 1,
+    
+    // --- NEW DEDICATED TAB FUNCTION ---
+    setTab(viewName, playSound = false) {
+        if (playSound) SoundFX.playClick();
+        
+        // 1. Clear all active classes
+        document.querySelectorAll('.screen-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        
+        // 2. Find the new tab and activate it
+        const targetTab = document.querySelector(`.screen-tab[data-view="${viewName}"]`);
+        if (targetTab) {
+            targetTab.classList.add('active');
+            
+            // Update desktop title
+            const titleEl = document.getElementById('desktop-view-title');
+            if(titleEl) titleEl.innerText = targetTab.innerText;
+        }
+        
+        // 3. Find the new view and activate it
+        const targetView = document.getElementById('view-' + viewName);
+        if (targetView) targetView.classList.add('active');
+        
+        this.currentTab = viewName;
+        this.refreshUI();
+    },
 
     init() {
         // Setup Tabs
         document.querySelectorAll('.screen-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                SoundFX.playClick();
-                document.querySelectorAll('.screen-tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-                tab.classList.add('active');
-                this.currentTab = tab.dataset.view;
-                document.getElementById('view-' + this.currentTab).classList.add('active');
-                
-                // NEW: Update desktop title to match tab inner text
-                const titleEl = document.getElementById('desktop-view-title');
-                if(titleEl) titleEl.innerText = tab.innerText;
-
-                this.refreshUI();
+                this.setTab(tab.dataset.view, true); // true = play sound on user click
             });
         });
 
@@ -37,11 +52,18 @@ const GameApp = {
                 }
             });
         }
+        this.setTab(this.currentTab, false);
         
         this.refreshUI();
 
         // Start 1-second Cooldown Ticker
         setInterval(() => this.tickTimers(), 1000);
+    },
+    // Bridges standard UI events over to our Phaser overlay
+    spawnFloatingText(x, y, textStr, color) {
+        if (typeof spawnPhaserFloatingText === 'function') {
+            spawnPhaserFloatingText(x, y, textStr, color);
+        }
     },
 
     refreshUI() {
@@ -263,7 +285,10 @@ const GameApp = {
         const sel = GameState.selectedInventoryItem;
         const textEl = document.getElementById('forge-selection-text');
         const btnForge = document.getElementById('btn-open-forge');
-        
+        const btnQuickSell = document.getElementById('btn-open-quicksell');
+        if (GameState.getInventoryCount(sel) > 0){
+            btnQuickSell.disabled = false;
+        }
         if (!sel || GameState.getInventoryCount(sel) < 9) {
             btnForge.disabled = true;
             textEl.innerHTML = sel ? `Selected: ${GameState.getItemName(sel, true)}<br>Needs 9 to forge (Has: ${GameState.getInventoryCount(sel)})` : "Select an item in warehouse";
@@ -272,6 +297,7 @@ const GameApp = {
             textEl.innerHTML = `Selected: ${GameState.getItemName(sel, true)}<br>Available: ${GameState.getInventoryCount(sel)} / Upgradeable!`;
             btnForge.onclick = () => { SoundFX.playClick(); this.openForgeModal(sel); };
         }
+        
     },
 
     renderMarket() {
@@ -355,6 +381,126 @@ const GameApp = {
             }
         });
     },
+
+    // ==========================================
+    // QUICK SELL LOGIC
+    // ==========================================
+    quickSellBatchCount: 1,
+
+    getQuickSellPrice(key) {
+        const parts = key.split('_');
+        const prod = GameState.products[parts[0]];
+        
+        // If it's enchanted, halve the enchanted minimum
+        if (parts[1] === 'enchanted') return Math.ceil(prod.enchMin / 2);
+        
+        // Otherwise, grab the standard minPrice, apply the tier multiplier, and halve it
+        const tier = parseInt(parts[1]);
+        const multipliers = [1.0, 1.5, 2.5, 4.0, 7.0, 15.0];
+        const mult = multipliers[tier] || 1.0;
+        
+        return Math.ceil((prod.minPrice * mult) / 2); // Math.ceil rounds UP!
+    },
+
+    openQuickSellModal() {
+        this.quickSellBatchCount = 1;
+        document.getElementById('quicksell-modal').style.display = 'flex';
+        this.updateQuickSellMath();
+    },
+
+    closeQuickSellModal() {
+        document.getElementById('quicksell-modal').style.display = 'none';
+    },
+
+    sliderQuickSellBatch(val) {
+        this.quickSellBatchCount = parseInt(val);
+        this.updateQuickSellMath();
+    },
+
+    adjustQuickSellBatch(dir) {
+        const max = GameState.getInventoryCount(GameState.selectedInventoryItem);
+        this.quickSellBatchCount += dir;
+        
+        if (this.quickSellBatchCount < 1) this.quickSellBatchCount = 1;
+        if (this.quickSellBatchCount > max) this.quickSellBatchCount = max;
+        
+        this.updateQuickSellMath();
+    },
+
+    updateQuickSellMath() {
+        const key = GameState.selectedInventoryItem;
+        const parts = key.split('_');
+        const prod = GameState.products[parts[0]];
+        const max = GameState.getInventoryCount(key);
+
+        // Update Icons and Stars
+        document.getElementById('qs-emoji').innerText = prod.emoji;
+        const starsEl = document.getElementById('qs-stars');
+        const colors = ['', 'tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-5'];
+        
+        if (parts[1] === 'enchanted') {
+            starsEl.className = 'f-stars stars enchanted';
+            starsEl.innerText = '✨';
+        } else if (parseInt(parts[1]) > 0) {
+            starsEl.className = `f-stars stars ${colors[parseInt(parts[1])]}`;
+            starsEl.innerText = '★';
+        } else {
+            starsEl.className = 'f-stars stars';
+            starsEl.innerText = '';
+        }
+
+        // Sync Slider and Text
+        document.getElementById('qs-slider').max = max;
+        document.getElementById('qs-slider').value = this.quickSellBatchCount;
+        document.getElementById('qs-batch-count').innerText = this.quickSellBatchCount;
+
+        // --- NEW LOGIC FOR UI ---
+        
+        // 1. Update the Quantity Badge on the item
+        document.getElementById('qs-qty-badge').innerText = `x${this.quickSellBatchCount}`;
+
+        // 2. Calculate price
+        const pricePerUnit = this.getQuickSellPrice(key);
+        const total = pricePerUnit * this.quickSellBatchCount;
+        
+        // 3. Update the Gold Box on the right
+        document.getElementById('qs-gold-result').innerText = `${total}g`;
+    },
+
+    executeQuickSell(e) {
+        const key = GameState.selectedInventoryItem;
+        const max = GameState.getInventoryCount(key);
+        
+        if (this.quickSellBatchCount > max) return; // Failsafe
+
+        const pricePerUnit = this.getQuickSellPrice(key);
+        const total = pricePerUnit * this.quickSellBatchCount;
+
+        // Execute transaction
+        GameState.modifyInventory(key, -this.quickSellBatchCount);
+        GameState.gold += total;
+        GameState.save();
+
+        // Visuals and Sound
+        SoundFX.playCoin();
+        this.showToast(`Quick sold for ${total}g!`);
+        this.spawnFloatingText(e.clientX, e.clientY, `+${total}g`, '#ffd700');
+
+        // Check if item stack is empty
+        if (GameState.getInventoryCount(key) <= 0) {
+            GameState.selectedInventoryItem = null;
+            this.closeQuickSellModal();
+        } else {
+            this.adjustQuickSellBatch(0); // Reset bounds if they still have some left
+        }
+        
+        this.refreshUI();
+    },
+    
+    
+    // ==========================================
+    // UPGRADES
+    // ==========================================
     buyMarketTier(e) {
         const tierCosts = [500, 2000, 8000, 30000, 100000];
         const cost = tierCosts[GameState.maxMarketTier];

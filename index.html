@@ -29,7 +29,7 @@
 
             <div class="screen-tabs">
                 <div class="screen-tab" data-view="hub">🎒 My Hub</div>
-                <div class="screen-tab active" data-view="market">⚖️ Markets</div>
+                <div class="screen-tab" data-view="market">⚖️ Markets</div>
                 <div class="screen-tab" data-view="upgrades">✨ Upgrades</div>
             </div>
 
@@ -59,11 +59,12 @@
                     <div class="forge-footer">
                         <div class="forge-footer-info" id="forge-selection-text">Select an item in warehouse</div>
                         <button class="btn-forge" id="btn-open-forge" disabled>🔨 Forge</button>
+                        <button class="btn-forge" id="btn-open-quicksell" disabled onclick="GameApp.openQuickSellModal()">💰 Quick Sell</button>
                     </div>
                 </div>
 
                 <!-- VIEW: MARKET -->
-                <div class="view active" id="view-market">
+                <div class="view" id="view-market">
                     <div class="market-info-bar">
                         <button id="btn-market-tier" class="btn-shuffle"  onclick="GameApp.cycleMarketTier()">
                             🔍 Tier: 0/0
@@ -154,6 +155,40 @@
             </div>
 
             <button class="btn-execute" onclick="GameApp.executeForge(event)">🔥 Activate Anvil Forge</button>
+        </div>
+    </div>
+    
+    <div id="quicksell-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 340px;">
+            <div class="modal-title" style="font-family: inherit;">💰 Quick Sell</div>
+            <button class="modal-close" style="background: #e85d3a; border-color: #7a2010;" onclick="GameApp.closeQuickSellModal()">✕</button>
+            
+            <div class="forge-visual" style="margin-bottom: 20px; justify-content: center; gap: 20px;">
+                
+                <div class="forge-box" style="border-color: #e85d3a; position: relative;">
+                    <div class="f-emoji" id="qs-emoji">🍎</div>
+                    <div class="f-stars stars" id="qs-stars"></div>
+                    <div class="item-qty" id="qs-qty-badge" style="font-size:20px;">x1</div> 
+                </div>
+
+                <div class="forge-arrow">⟹</div>
+
+                <div class="forge-box" style="border-color: #ffd700; background: rgba(255, 215, 0, 0.1);">
+                    <div class="f-emoji" style="font-size: 28px; line-height: 1;">💰</div>
+                    <div id="qs-gold-result" style="color: #ffd700; font-weight: 800; font-size: 16px; margin-top: 4px; text-shadow: 0 2px 0 rgba(0,0,0,0.5);">2g</div>
+                </div>
+
+            </div>
+
+            <div class="forge-controls" style="margin-bottom: 15px;">
+                <button class="btn-adjust" onclick="GameApp.adjustQuickSellBatch(-1)">-</button>
+                <div id="qs-batch-count">1</div>
+                <button class="btn-adjust plus" onclick="GameApp.adjustQuickSellBatch(1)">+</button>
+            </div>
+            
+            <input type="range" id="qs-slider" min="1" max="1" value="1" oninput="GameApp.sliderQuickSellBatch(this.value)" style="width: 100%; margin-bottom: 20px; accent-color: #e85d3a;">
+
+            <button class="btn-execute" onclick="GameApp.executeQuickSell(event)">💰 Sell Now</button>
         </div>
     </div>
 
