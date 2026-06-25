@@ -22,7 +22,7 @@
                 <div class="header-icon">🏪</div>
                 <div class="header-text">
                     <h1>The Grand Marketplace</h1>
-                    <div class="gold-bal" id="header-gold">🪙 Balance: 50g</div>
+                    <div class="gold-bal" id="header-gold">💰 Balance: 50g</div>
                 </div>
                 <button class="btn-menu mobile-menu-btn" onclick="GameApp.openMenuModal()">⚙️ Menu</button>
             </div>
@@ -46,7 +46,7 @@
                     <div class="wood-panel" style="display:none;">
                         <div class="green-ribbon">COFFER STATUS</div>
                         <div class="balance-card">
-                            <div class="balance-amount" id="hub-gold">🪙 50g</div>
+                            <div class="balance-amount" id="hub-gold">💰 50g</div>
                             <div class="net-worth" id="hub-networth">Total Assets Valuation: 50g</div>
                         </div>
                     </div>
@@ -59,7 +59,7 @@
                     <div class="forge-footer">
                         <div class="forge-footer-info" id="forge-selection-text">Select an item in warehouse</div>
                         <button class="btn-forge" id="btn-open-forge" disabled>🔨 Forge</button>
-                        <button class="btn-forge" id="btn-open-quicksell" disabled onclick="GameApp.openQuickSellModal()">💰 Quick Sell</button>
+                        <button class="btn-forge" id="btn-open-quicksell" disabled onclick="GameApp.openQuickSellModal(); SoundFX.playClick()">💰 Quick Sell</button>
                     </div>
                 </div>
 

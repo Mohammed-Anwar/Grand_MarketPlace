@@ -6,7 +6,8 @@
 const GameApp = {
     currentTab: 'hub',
     forgeBatchCount: 1,
-    
+    displayedGold: GameState.gold, 
+    goldCounterInterval: null,
     // --- NEW DEDICATED TAB FUNCTION ---
     setTab(viewName, playSound = false) {
         if (playSound) SoundFX.playClick();
@@ -53,11 +54,58 @@ const GameApp = {
             });
         }
         this.setTab(this.currentTab, false);
-        
+        this.displayedGold = GameState.gold;
         this.refreshUI();
 
         // Start 1-second Cooldown Ticker
         setInterval(() => this.tickTimers(), 1000);
+    }, 
+
+    // Replace or update your standard gold update code with this function
+    animateGoldCounter() {
+        // Clear any previous ongoing counters so they don't fight each other
+        if (this.goldCounterInterval) clearInterval(this.goldCounterInterval);
+
+        const targetGold = GameState.gold;
+
+        // Determine how fast it ticks up based on how much gold was earned
+        const goldDifference = Math.abs(targetGold - this.displayedGold);
+        if (goldDifference === 0) return;
+
+        // Adjust speed dynamically: larger gains roll faster
+        const stepTime = Math.max(10, Math.min(50, 300 / goldDifference)); 
+        const stepAmount = Math.ceil(goldDifference / 30); // finish counting in roughly 30 steps
+
+        this.goldCounterInterval = setInterval(() => {
+            if (this.displayedGold < targetGold) {
+                this.displayedGold += stepAmount;
+                if (this.displayedGold > targetGold) this.displayedGold = targetGold;
+            } else if (this.displayedGold > targetGold) {
+                this.displayedGold -= stepAmount;
+                if (this.displayedGold < targetGold) this.displayedGold = targetGold;
+            }
+
+            // Update the DOM text strings across both possible UI panels
+            const txt = `💰 Balance: ${this.displayedGold}g`;
+            const headerEl = document.getElementById('header-gold');
+            const hubEl = document.getElementById('hub-gold');
+            
+            if (headerEl) headerEl.innerText = txt;
+            if (hubEl) hubEl.innerText = txt;
+
+            // Stop counting once we reach the exact total gold value
+            if (this.displayedGold === targetGold) {
+                clearInterval(this.goldCounterInterval);
+                this.goldCounterInterval = null;
+                
+                // Optional Juice: Quick scale pop to show it finished
+                const containerEl = headerEl || hubEl;
+                if(containerEl) {
+                    containerEl.style.transform = "scale(1.1)";
+                    setTimeout(() => containerEl.style.transform = "scale(1)", 100);
+                }
+            }
+        }, stepTime);
     },
     // Bridges standard UI events over to our Phaser overlay
     spawnFloatingText(x, y, textStr, color) {
@@ -67,7 +115,13 @@ const GameApp = {
     },
 
     refreshUI() {
-        document.getElementById('header-gold').innerText = `💰 Balance: ${GameState.gold.toLocaleString()}g`;
+        // Inside refreshUI():
+        // Instead of updating innerText directly, use the tracking value for static redraws
+        const currentTxt = `💰 Balance: ${this.displayedGold}g`;
+        if (document.getElementById('header-gold')) document.getElementById('header-gold').innerText = currentTxt;
+        if (document.getElementById('hub-gold')) document.getElementById('hub-gold').innerText = currentTxt;
+        
+        
         this.updateTierButtonText();
         if (this.currentTab === 'hub') this.renderHub();
         else if (this.currentTab === 'market') this.renderMarket();
@@ -211,7 +265,7 @@ const GameApp = {
         if (GameState.gold >= 10) {
             GameState.gold -= 10; GameState.offers = []; this.generateMissingOffers();
             GameState.updateNetWorth(); GameState.save();
-            SoundFX.playCoin(); this.refreshUI();
+            SoundFX.playTradeClick(); this.refreshUI();
         } else {
             SoundFX.playError(); this.showToast("Not enough gold to shuffle!");
         }
@@ -242,15 +296,25 @@ const GameApp = {
             if (GameState.gold < totalCost) { SoundFX.playError(); this.showToast("Insufficient gold funds in coffer!"); return; }
             if (GameState.getInventoryCount(key) + offer.qty > GameState.maxInventoryStack) { SoundFX.playError(); this.showToast(`Warehouse full! Max is ${GameState.maxInventoryStack}.`); return; }
             GameState.gold -= totalCost; GameState.modifyInventory(key, offer.qty);
+            
+            // 🪙 INSTANTLY SNAP THE COUNTER FOR BUYING
+            this.displayedGold = GameState.gold; 
+
         } else {
             if (GameState.getInventoryCount(key) < offer.qty) { SoundFX.playError(); this.showToast(`Not enough product to sell!`); return; }
             GameState.gold += totalCost; GameState.modifyInventory(key, -offer.qty);
+            
+            // 👇 PASS totalCost HERE AS THE THIRD ARGUMENT
+            if (typeof spawnPhaserFlyingCoin === 'function' && e) {
+                spawnPhaserFlyingCoin(e.clientX, e.clientY, totalCost);
+            }
         }
 
         GameState.totalTrades++;
-        offer.cooldownActive = true; offer.cooldownEndTime = Date.now() + 10000; offer.cooldownTimer = 10;
+        offer.cooldownActive = true; offer.cooldownEndTime = Date.now() + (GameState.offerCooldowns * 1000 - 1300 ); offer.cooldownTimer = GameState.offerCooldowns; // 10 seconds cooldown
         
-        SoundFX.playCoin(); this.triggerExplosion(e);
+        SoundFX.playTradeClick(); 
+        this.triggerExplosion(e);
         GameState.updateNetWorth(); GameState.save(); this.refreshUI();
     },
 
@@ -481,10 +545,14 @@ const GameApp = {
         GameState.gold += total;
         GameState.save();
 
-        // Visuals and Sound
-        SoundFX.playCoin();
+        SoundFX.playTradeClick();
         this.showToast(`Quick sold for ${total}g!`);
         this.spawnFloatingText(e.clientX, e.clientY, `+${total}g`, '#ffd700');
+        
+        // 👇 PASS total HERE AS THE THIRD ARGUMENT
+        if (typeof spawnPhaserFlyingCoin === 'function' && e) {
+            spawnPhaserFlyingCoin(e.clientX, e.clientY, total);
+        }
 
         // Check if item stack is empty
         if (GameState.getInventoryCount(key) <= 0) {
@@ -544,7 +612,7 @@ const GameApp = {
         if (GameState.gold >= cost) { GameState.gold -= cost; GameState.products[key].unlocked = true; this.onUpgSuccess(e); }
         else { SoundFX.playError(); this.showToast("Not enough gold!"); }
     },
-    onUpgSuccess(e) { SoundFX.playUpgrade(); this.triggerExplosion(e); GameState.updateNetWorth(); GameState.save(); this.refreshUI(); },
+    onUpgSuccess(e) { this.displayedGold = GameState.gold; SoundFX.playUpgrade(); this.triggerExplosion(e); GameState.updateNetWorth(); GameState.save(); this.refreshUI(); },
 
     // --- FORGE MODAL LOGIC ---
     openForgeModal(key) {

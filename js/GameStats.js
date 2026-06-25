@@ -9,7 +9,8 @@ const GameState = {
     maxMarketTier: 0,    // Maximum unlocked tier (0 to 5)
     activeSlotsCount: 1, 
     maxInventoryStack: 99, 
-    selectedInventoryItem: null, 
+    selectedInventoryItem: null,
+    offerCooldowns: 5, // 10 seconds cooldown for each offer after a trade
     totalTrades: 0,
     totalCrafts: 0,
     netWorth: 50,
