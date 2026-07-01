@@ -194,10 +194,13 @@ export const MarketController = {
                 canTrade = GameState.getInventoryCount(key) >= offer.qty;
             }
             
+            // Call Phaser to generate the HTML element for this specific item's frame ID
+            let itemIconHTML = getPhaserSpriteHTML('food-items', prod.frameId)
+            
             list.innerHTML += `
                 <div class="market-item ${offer.type === 'SELL' ? 'sell-deal' : ''} ${isRareClass}">
                     <div class="market-item-icon" style="position: relative;">
-                        ${prod.emoji}
+                        ${itemIconHTML}
                         ${starHTML}
                         <div class="item-qty">x${offer.qty}</div>
                     </div>

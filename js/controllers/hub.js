@@ -26,14 +26,18 @@ export const HubController = {
             grid.innerHTML = `<div style="grid-column: span 4; text-align: center; color: #e8d5a8; font-size: 13px; padding: 20px;">Your warehouse is empty!<br>Buy some produce in the markets.</div>`;
         } else {
             keys.forEach(key => {
-                const parts = key.split('_'); const prod = GameState.products[parts[0]]; const stars = parts[1];
+                const parts = key.split('_'); 
+                const prod = GameState.products[parts[0]]; 
+                
+                const stars = parts[1];
                 const div = document.createElement('div');
                 div.className = `inv-item ${GameState.selectedInventoryItem === key ? 'selected' : ''}`;
+                let itemIconHTML = getPhaserSpriteHTML('food-items', prod.frameId)
                 
                 const colors = ['', 'tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-5'];
                 let starHTML = stars === 'enchanted' ? '<div class="stars enchanted">✨</div>' : (stars > 0 ? `<div class="stars ${colors[stars]}">★</div>` : '');
                 
-                div.innerHTML = `<div class="emoji-container"><span class="item-emoji">${prod.emoji}</span>${starHTML}</div><span class="item-qty" style="font-size: 20px;">x${GameState.inventory[key]}</span>`;
+                div.innerHTML = `<div class="emoji-container">${itemIconHTML}${starHTML}</div><span class="item-qty" style="font-size: 20px;">x${GameState.inventory[key]}</span>`;
                 
                 div.onclick = () => { SoundFX.playClick(); GameState.selectedInventoryItem = key; this.renderHub(app); };
                 grid.appendChild(div);
@@ -89,9 +93,12 @@ export const HubController = {
 
     updateQuickSellMath() {
         const key = GameState.selectedInventoryItem;
-        const parts = key.split('_'); const prod = GameState.products[parts[0]]; const max = GameState.getInventoryCount(key);
+        const parts = key.split('_'); 
+        const prod = GameState.products[parts[0]];
+        const max = GameState.getInventoryCount(key);
 
-        document.getElementById('qs-emoji').innerText = prod.emoji;
+        // New Spritesheet Approach
+        document.getElementById('qs-emoji').innerHTML = getPhaserSpriteHTML('food-items', prod.frameId);
         const starsEl = document.getElementById('qs-stars');
         const colors = ['', 'tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-5'];
         

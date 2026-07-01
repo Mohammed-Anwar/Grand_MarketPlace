@@ -10,6 +10,10 @@ class ParticleScene extends Phaser.Scene {
     preload() {
         // Preload your coin image (make sure the path is correct relative to your HTML file)
         this.load.image('coin', 'assets/coin.png');
+        this.load.spritesheet('food-items', 'assets/items/food_sheet.png', {
+            frameWidth: 16,
+            frameHeight: 16
+        });
     }
 
     create() {
@@ -33,7 +37,11 @@ class ParticleScene extends Phaser.Scene {
             blendMode: 'ADD',
             emitting: false,
         });
+        if (window.GameApp && typeof window.GameApp.refreshUI === 'function') {
+            window.GameApp.refreshUI();
+        }
     }
+    
 }
 
 // --- VALUE-DEPENDENT GLOBAL FLYING COIN FUNCTION ---
@@ -151,6 +159,27 @@ function spawnPhaserFloatingText(x, y, textStr, color = '#ffd700') {
             txt.destroy(); 
         }
     });
+}
+
+// --- DYNAMIC HTML IMAGE GENERATOR ---
+function getPhaserSpriteHTML(textureKey, frameId, className = "") {
+    const cols = 8;
+    const spriteSize = 16; // Original base asset size
+    const scale = 2;       // Target display multiplier (16px * 2 = 32px)
+
+    const col = frameId % cols;
+    const row = Math.floor(frameId / cols);
+
+    // Calculate exact shifting offsets
+    const posX = col * spriteSize * scale;
+    const posY = row * spriteSize * scale;
+
+    const explicitImagePath = 'assets/items/food_sheet.png';
+
+    return `<span class="phaser-html-sprite ${className}" style="
+        background-image: url('${explicitImagePath}');
+        background-position: -${posX}px -${posY}px;
+    "></span>`;
 }
 
 const phaserConfig = {

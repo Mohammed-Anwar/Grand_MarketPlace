@@ -3,7 +3,7 @@ import { HubController } from './controllers/hub.js';
 import { UpgradesController } from './controllers/upgrades.js';
 
 window.GameApp = {
-    currentTab: 'market',
+    currentTab: 'hub',
     forgeBatchCount: 1,
     displayedGold: 0, 
     goldCounterInterval: null,
@@ -188,6 +188,7 @@ window.GameApp = {
             localStorage.removeItem('grand_marketplace_save'); window.location.reload();
         }
     },
+
     openForgeModal(key) {
         this.forgeBatchCount = 1;
         const parts = key.split('_'); const pKey = parts[0]; const stars = parts[1];
@@ -195,11 +196,13 @@ window.GameApp = {
         const nextStars = stars === '5' ? 'enchanted' : (parseInt(stars) + 1).toString();
         const colors = ['', 'tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-5'];
 
-        document.getElementById('f-src-emoji').innerText = prod.emoji;
+        // 🌟 CHANGE 1: Use the Phaser HTML sprite for the Source Item
+        document.getElementById('f-src-emoji').innerHTML = getPhaserSpriteHTML('food-items', prod.frameId);
         document.getElementById('f-src-stars').innerHTML = stars === 'enchanted' ? '✨' : (stars > 0 ? '★' : '');
         document.getElementById('f-src-stars').className = `f-stars stars ${stars === 'enchanted' ? 'enchanted' : (colors[stars] || '')}`;
 
-        document.getElementById('f-dst-emoji').innerText = prod.emoji;
+        // 🌟 CHANGE 2: Use the Phaser HTML sprite for the Destination Item
+        document.getElementById('f-dst-emoji').innerHTML = getPhaserSpriteHTML('food-items', prod.frameId);
         document.getElementById('f-dst-stars').innerHTML = nextStars === 'enchanted' ? '✨' : '★';
         document.getElementById('f-dst-stars').className = `f-stars stars ${nextStars === 'enchanted' ? 'enchanted' : colors[nextStars]}`;
 

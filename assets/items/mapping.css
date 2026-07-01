@@ -1,0 +1,68 @@
+.pixel-sprite {
+    display: inline-block;
+    width: 32px;  /* The display size of your item in the UI */
+    height: 32px; /* The display size of your item in the UI */
+    background-image: url('assets/items/food_sheet.png');
+    background-repeat: no-repeat;
+    
+    /* Crucial for scaling pixel art up without turning it blurry! */
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    
+    /* Our sheet is 8 items wide. If 1 item displays at 32px, 
+       the entire background scale must be 8 * 32px = 256px */
+    background-size: 256px 256px; 
+}
+
+/* Row 0 */
+.sprite-0  { background-position: 0px 0px; }       /* Column 1 (e.g., Apple) */
+.sprite-1  { background-position: -32px 0px; }     /* Column 2 */
+.sprite-2  { background-position: -64px 0px; }     /* Column 3 */
+.sprite-3  { background-position: -96px 0px; }     /* Column 4 */
+.sprite-4  { background-position: -128px 0px; }    /* Column 5 */
+.sprite-5  { background-position: -160px 0px; }    /* Column 6 */
+.sprite-6  { background-position: -192px 0px; }    /* Column 7 */
+.sprite-7  { background-position: -224px 0px; }    /* Column 8 */
+
+/* Row 1 */
+.sprite-8  { background-position: 0px -32px; }     /* Column 1 */
+.sprite-9  { background-position: -32px -32px; }   /* Column 2 */
+.sprite-10 { background-position: -64px -32px; }   /* Column 3 */
+.sprite-11 { background-position: -96px -32px; }   /* Column 4 */
+.sprite-12 { background-position: -128px -32px; }  /* Column 5 */
+.sprite-13 { background-position: -160px -32px; }  /* Column 6 */
+/* Row 2 */ 
+.sprite-14 { background-position: 0px -64px; }     /* Column 1 */
+.sprite-15 { background-position: -32px -64px; }   /* Column 2 */
+.sprite-16 { background-position: -64px -64px; }   /* Column 3 */
+.sprite-17 { background-position: -96px -64px; }   /* Column 4 */
+.sprite-18 { background-position: -128px -64px; }  /* Column 5 */
+.sprite-19 { background-position: -160px -64px; }  /* Column 6 */
+/* Row 3 */
+.sprite-20 { background-position: 0px -96px; }     /* Column 1 */
+.sprite-21 { background-position: -32px -96px; }   /* Column 2 */
+.sprite-22 { background-position: -64px -96px; }   /* Column 3 */
+.sprite-23 { background-position: -96px -96px; }   /* Column 4 */
+.sprite-24 { background-position: -128px -96px; }  /* Column 5 */
+.sprite-25 { background-position: -160px -96px; }  /* Column 6 */
+/* Row 4 */
+.sprite-26 { background-position: 0px -128px; }     /* Column 1 */
+.sprite-27 { background-position: -32px -128px; }   /* Column 2 */
+.sprite-28 { background-position: -64px -128px; }   /* Column 3 */
+.sprite-29 { background-position: -96px -128px; }   /* Column 4 */
+.sprite-30 { background-position: -128px -128px; }  /* Column 5 */
+.sprite-31 { background-position: -160px -128px; }  /* Column 6 */
+/* Row 5 */
+.sprite-32 { background-position: 0px -160px; }     /* Column 1 */
+.sprite-33 { background-position: -32px -160px; }   /* Column 2 */
+.sprite-34 { background-position: -64px -160px; }   /* Column 3 */
+.sprite-35 { background-position: -96px -160px; }   /* Column 4 */
+.sprite-36 { background-position: -128px -160px; }  /* Column 5 */
+.sprite-37 { background-position: -160px -160px; }  /* Column 6 */
+/* Row 6 */
+.sprite-38 { background-position: 0px -192px; }     /* Column 1 */
+.sprite-39 { background-position: -32px -192px; }   /* Column 2 */
+.sprite-40 { background-position: -64px -192px; }   /* Column 3 */
+.sprite-41 { background-position: -96px -192px; }   /* Column 4 */
+.sprite-42 { background-position: -128px -192px; }  /* Column 5 */
+.sprite-43 { background-position: -160px -192px; }  /* Column 6 */

@@ -23,7 +23,8 @@ export const UpgradesController = {
             const prod = GameState.products[pKey];
             if (prod.unlockCost > 0) {
                 const canAffordProd = GameState.gold >= prod.unlockCost || prod.unlocked;
-                list.innerHTML += app.upgCardHTML(`${prod.emoji} Unlock ${prod.name}s`, prod.unlocked ? "Unlocked & active" : `Adds ${prod.name} to rotation`, prod.unlocked, prod.unlockCost, `GameApp.buyProduct('${pKey}', ${prod.unlockCost}, event)`, canAffordProd);
+                getPhaserSpriteHTML('food-items', prod.frameId)
+                list.innerHTML += app.upgCardHTML(`${getPhaserSpriteHTML('food-items', prod.frameId)} Unlock ${prod.name}s`, prod.unlocked ? "Unlocked & active" : `Adds ${prod.name} to rotation`, prod.unlocked, prod.unlockCost, `GameApp.buyProduct('${pKey}', ${prod.unlockCost}, event)`, canAffordProd);
             }
         });
     },

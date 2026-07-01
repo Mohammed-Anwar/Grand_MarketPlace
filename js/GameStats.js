@@ -21,6 +21,7 @@ const GameState = {
         apple: { 
             name: "Apple", 
             emoji: "🍎", 
+            frameId: 12,
             unlocked: true, 
             unlockCost: 0,
             minPrice: 3, maxPrice: 9, 
@@ -32,11 +33,12 @@ const GameState = {
             forgeCostRatio: 9     // Takes 9 pieces to forge
         },
 
-        // --- 🍓 BERRY: The Volatile High-Risk Gamble ---
+        // --- 🧀 CHEESE: The Volatile High-Risk Gamble ---
         // Personality: Massive price range variance. Extremely cheap floor, massive jackpot ceiling. 
-        berry: { 
-            name: "Berry", 
-            emoji: "🍌", 
+        cheese: { 
+            name: "Cheese", 
+            emoji: "🧀", 
+            frameId: 24,
             unlocked: false, 
             unlockCost: 150,
             minPrice: 4, maxPrice: 35,         // Huge spread percentage-wise
@@ -53,6 +55,7 @@ const GameState = {
         pear: { 
             name: "Pear", 
             emoji: "🍐", 
+            frameId: 46,
             unlocked: false, 
             unlockCost: 500,
             minPrice: 30, maxPrice: 50,         // Safe, low-risk tight margins
@@ -69,6 +72,7 @@ const GameState = {
         grape: { 
             name: "Grape", 
             emoji: "🍇", 
+            frameId: 51,
             unlocked: false, 
             unlockCost: 1800,
             minPrice: 65, maxPrice: 130, 
@@ -80,11 +84,12 @@ const GameState = {
             forgeCostRatio: 5     // Highly appealing to forge—only takes 5 items instead of 9!
         },
 
-        // --- 🎃 PUMPKIN: The Heavyweight Crop ---
+        // --- 🍉 WATERMELON: The Heavyweight Crop ---
         // Personality: Slow-moving, heavy asset. Massive bulk order sizes, but requires a lot of materials to refine.
         pumpkin: { 
-            name: "Pumpkin", 
-            emoji: "🎃", 
+            name: "WaterMelon", 
+            emoji: "🍉", 
+            frameId: 48,
             unlocked: false, 
             unlockCost: 6000,
             minPrice: 160, maxPrice: 320, 
@@ -101,6 +106,7 @@ const GameState = {
         dragonfruit: { 
             name: "Dragonfruit", 
             emoji: "🐉", 
+            frameId: 54,
             unlocked: false, 
             unlockCost: 20000,
             minPrice: 450, maxPrice: 950, 
