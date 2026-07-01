@@ -268,6 +268,7 @@ body {
 
 .market-item {
     background: linear-gradient(180deg, #fff5df 0%, #f0e0b8 100%);
+    min-height: 80px;
     border: 3px solid #bda071;
     border-radius: 16px;
     padding: 12px;
@@ -277,6 +278,7 @@ body {
     gap: 12px;
     box-shadow: 0 4px 0 #d1b588;
     position: relative;
+    transition: transform 0.2s;
 }
 .market-item.sell-deal { background: linear-gradient(180deg, #fff0e0 0%, #f0d8c0 100%); }
 .market-item.rare { border-color: #9b4aff; }
@@ -315,6 +317,43 @@ body {
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 .market-item-total { font-size: 11px; font-weight: 600; color: #8b6914; }
+/* =========================================================
+   INNER VARIATION : IMPLODE
+   Elements snap into place from a large, scaled-up state
+   ========================================================= */
+.market-item.flash-in > * { 
+    animation: snapIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; 
+}
+
+/* These classes only exist on active deal items, so they don't conflict with cooldowns */
+.market-item.flash-in .market-item-icon { animation-delay: 0.1s; }
+.market-item.flash-in .market-item-info { animation-delay: 0.15s; }
+.market-item.flash-in .market-price-col { animation-delay: 0.2s; }
+.market-item.flash-in .btn-trade { animation-delay: 0.25s; }
+
+/* ADDED: Stagger the text spans inside the cooldown card for extra polish! */
+.market-item.flash-in.cooldown span:nth-child(1) { animation-delay: 0.1s; }
+.market-item.flash-in.cooldown span:nth-child(2) { animation-delay: 0.2s; }
+
+@keyframes snapIn { 
+    from { transform: scale(1.5); opacity: 0; } 
+    to { transform: scale(1); opacity: 1; } 
+}
+
+/* Inner Implosion sequence triggered by flash-in */
+.flash-in .market-item:not(.cooldown) > * { 
+    animation: snapIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; 
+}
+.flash-in .market-item:not(.cooldown) .market-item-icon { animation-delay: 0.1s; }
+.flash-in .market-item:not(.cooldown) .market-item-info { animation-delay: 0.15s; }
+.flash-in .market-item:not(.cooldown) .market-price-col { animation-delay: 0.2s; }
+.flash-in .market-item:not(.cooldown) .btn-trade { animation-delay: 0.25s; }
+
+@keyframes snapIn { 
+    from { transform: scale(1.5); opacity: 0; } 
+    to { transform: scale(1); opacity: 1; } 
+}
+
 
 .btn-trade {
     border: 2px solid; border-radius: 10px;

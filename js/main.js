@@ -4,7 +4,7 @@
     DOM APP CONTROLLER
 ==================================================================== */
 const GameApp = {
-    currentTab: 'hub',
+    currentTab: 'market',
     forgeBatchCount: 1,
     displayedGold: GameState.gold, 
     goldCounterInterval: null,
@@ -273,10 +273,16 @@ const GameApp = {
 
     tickTimers() {
         let changed = false; const now = Date.now();
+        let restockedIndices = []; // Track which slots finished restocking
+
         GameState.offers.forEach((offer, idx) => {
             if (offer.cooldownActive) {
                 const remaining = Math.ceil((offer.cooldownEndTime - now) / 1000);
-                if (remaining <= 0) { GameState.offers[idx] = this.createRandomOffer(offer.id); changed = true; }
+                if (remaining <= 0) { 
+                    GameState.offers[idx] = this.createRandomOffer(offer.id); 
+                    changed = true; 
+                    restockedIndices.push(idx); // Record this index
+                }
                 else {
                     offer.cooldownTimer = remaining;
                     const tDom = document.getElementById(`timer-txt-${offer.id}`);
@@ -284,38 +290,106 @@ const GameApp = {
                 }
             }
         });
-        if (changed) { GameState.save(); if (this.currentTab === 'market') this.renderMarket(); }
+
+        if (changed) { 
+            GameState.save(); 
+            if (this.currentTab === 'market') {
+                this.renderMarket(); 
+
+                // --- FIX: TRIGGER THE FLASH-IN ANIMATION FOR RESTOCKED CARDS ---
+                restockedIndices.forEach(idx => {
+                    const newCard = document.querySelectorAll('.market-item')[idx];
+                    if (newCard) {
+                        newCard.classList.add('flash-in');
+                        // Remove class after 1s so it doesn't cause loop issues
+                        setTimeout(() => newCard.classList.remove('flash-in'), 1000);
+                    }
+                });
+            } 
+        }
     },
 
     executeTrade(idx, e) {
+        const offer = GameState.offers[idx];
+        
+        // 1. Safety check: Don't execute if already on cooldown or invalid
+        if (offer.cooldownActive) return;
+
+        // --- FIX: VALIDATION CHECK BEFORE ANY ANIMATION PLAYS ---
+        const totalCost = offer.pricePerUnit * offer.qty;
+        const key = `${offer.productKey}_${offer.stars}`;
+
+        if (offer.type === 'BUY') {
+            if (GameState.gold < totalCost) { 
+                SoundFX.playError(); 
+                this.showToast("Insufficient gold!"); 
+                return; 
+            }
+            if (GameState.getInventoryCount(key) + offer.qty > GameState.maxInventoryStack) { 
+                SoundFX.playError(); 
+                this.showToast("Warehouse full!"); 
+                return; 
+            }
+        } else {
+            if (GameState.getInventoryCount(key) < offer.qty) { 
+                SoundFX.playError(); 
+                this.showToast("Not enough to sell!"); 
+                return; 
+            }
+        }
+
+        // 2. Locate the card element
+        const cardEl = e.target.closest('.market-item');
+        
+        // 3. Play the "Flash Out" animation
+        cardEl.classList.add('flash-out');
+
+        // 4. Wait for the animation to finish (300ms)
+        setTimeout(() => {
+            // --- CALL THE ACTUAL GAME LOGIC ---
+            this.performTradeLogic(idx);
+            
+            // 5. Select the new card (which is now the cooldown card) and flash it in
+            const newCard = document.querySelectorAll('.market-item')[idx];
+            if (newCard) {
+                newCard.classList.add('flash-in');
+                setTimeout(() => newCard.classList.remove('flash-in'), 1000);
+            }
+        }, 100);
+    },
+
+    performTradeLogic(idx) {
         const offer = GameState.offers[idx];
         const totalCost = offer.pricePerUnit * offer.qty;
         const key = `${offer.productKey}_${offer.stars}`;
 
         if (offer.type === 'BUY') {
-            if (GameState.gold < totalCost) { SoundFX.playError(); this.showToast("Insufficient gold funds in coffer!"); return; }
-            if (GameState.getInventoryCount(key) + offer.qty > GameState.maxInventoryStack) { SoundFX.playError(); this.showToast(`Warehouse full! Max is ${GameState.maxInventoryStack}.`); return; }
-            GameState.gold -= totalCost; GameState.modifyInventory(key, offer.qty);
-            
-            // 🪙 INSTANTLY SNAP THE COUNTER FOR BUYING
-            this.displayedGold = GameState.gold; 
-
-        } else {
-            if (GameState.getInventoryCount(key) < offer.qty) { SoundFX.playError(); this.showToast(`Not enough product to sell!`); return; }
-            GameState.gold += totalCost; GameState.modifyInventory(key, -offer.qty);
-            
-            // 👇 PASS totalCost HERE AS THE THIRD ARGUMENT
-            if (typeof spawnPhaserFlyingCoin === 'function' && e) {
-                spawnPhaserFlyingCoin(e.clientX, e.clientY, totalCost);
+            if (GameState.gold < totalCost) { SoundFX.playError(); this.showToast("Insufficient gold!"); return; }
+            if (GameState.getInventoryCount(key) + offer.qty > GameState.maxInventoryStack) { 
+                SoundFX.playError(); this.showToast("Warehouse full!"); return; 
             }
+            GameState.gold -= totalCost; 
+            GameState.modifyInventory(key, offer.qty);
+            this.displayedGold = GameState.gold; 
+        } else {
+            if (GameState.getInventoryCount(key) < offer.qty) { 
+                SoundFX.playError(); this.showToast("Not enough to sell!"); return; 
+            }
+            GameState.gold += totalCost; 
+            GameState.modifyInventory(key, -offer.qty);
+            // Note: You might want to move spawnPhaserFlyingCoin here 
+            // but remember it needs event data (e).
         }
 
         GameState.totalTrades++;
-        offer.cooldownActive = true; offer.cooldownEndTime = Date.now() + (GameState.offerCooldowns * 1000 - 1300 ); offer.cooldownTimer = GameState.offerCooldowns; // 10 seconds cooldown
+        offer.cooldownActive = true;
+        offer.cooldownEndTime = Date.now() + (GameState.offerCooldowns * 1000);
+        offer.cooldownTimer = GameState.offerCooldowns;
         
-        SoundFX.playTradeClick(); 
-        this.triggerExplosion(e);
-        GameState.updateNetWorth(); GameState.save(); this.refreshUI();
+        SoundFX.playTradeClick();
+        GameState.updateNetWorth(); 
+        GameState.save(); 
+        this.refreshUI();
     },
 
     // --- RENDERING ---
@@ -343,6 +417,14 @@ const GameApp = {
                 div.onclick = () => { SoundFX.playClick(); GameState.selectedInventoryItem = key; this.renderHub(); };
                 grid.appendChild(div);
             });
+        }
+
+        const whContainer = document.getElementById('hub-warehouse-upgrade');
+        if (whContainer) {
+            const maxWH = GameState.maxInventoryStack >= 999;
+            const whNext = GameState.maxInventoryStack === 99 ? 199 : (GameState.maxInventoryStack === 199 ? 499 : 999);
+            const whCost = GameState.maxInventoryStack === 99 ? 300 : (GameState.maxInventoryStack === 199 ? 1200 : 4500);
+            whContainer.innerHTML = this.upgCardHTML("📦 Expand Warehouse", maxWH ? "Fully Upgraded" : `Max Stack Limit: ${GameState.maxInventoryStack} → ${whNext}`, maxWH, whCost, `GameApp.buyWarehouse(${whNext}, ${whCost}, event)`);
         }
         
         // Footer
@@ -379,10 +461,9 @@ const GameApp = {
             }
             let offerTier = offer.stars === 'enchanted' ? 5 : parseInt(offer.stars);
             if (offerTier > GameState.marketTierFilter) {
-                // This offer is too high for the current filter! Reroll it.
                 GameState.offers[idx] = this.createRandomOffer(offer.id);
-                offer = GameState.offers[idx]; // Update local reference to the new offer
-                GameState.save(); // Persist the newly generated offer
+                offer = GameState.offers[idx];
+                GameState.save();
             }
             const prod = GameState.products[offer.productKey];
             const colors = ['', 'tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-5'];
@@ -398,9 +479,7 @@ const GameApp = {
                         <div class="item-qty">x${offer.qty}</div>
                     </div>
                     <div class="market-item-info">
-                        
                         <div class="market-item-name">${nameStr}</div>
-                        
                     </div>
                     <div class="market-price-col">
                         <div class="market-item-price">${offer.pricePerUnit}</div>
@@ -411,24 +490,35 @@ const GameApp = {
                     </button>
                 </div>`;
         });
-    
+
+        // --- NEW: Dynamic Upgrade Slot Placement ---
+        const maxSlots = GameState.activeSlotsCount >= 6;
+        if (!maxSlots) {
+            const slotCost = [0, 0, 200, 600, 1800, 5000, 15000][GameState.activeSlotsCount + 1] || 999999;
+            list.innerHTML += `
+                <div class="market-item upgrade-slot-card" style="cursor: pointer; border: 3px dashed #bda071; background: rgba(131, 83, 44, 0.25);" onclick="GameApp.buySlot(event)">
+                    <div class="market-item-icon" style="background: transparent; border: 2px dashed #bda071; font-size: 24px;">
+                        ➕
+                    </div>
+                    <div class="market-item-info">
+                        <div class="market-item-name" style="color: #fff;">🏪 Expand Market Slot</div>
+                        <div style="font-size: 11px; color: #e8d5a8; font-weight: 600; margin-top: 2px;">Unlock Offer Card #${GameState.activeSlotsCount + 1}</div>
+                    </div>
+                    <div class="market-price-col">
+                        <div class="market-item-price">${slotCost}g</div>
+                    </div>
+                    <button class="btn-trade buy" style="pointer-events: none;">
+                        Unlock
+                    </button>
+                </div>`;
+        }
     },
 
     renderUpgrades() {
         const list = document.getElementById('upgrades-list');
         list.innerHTML = '';
 
-        // Slots
-        const maxSlots = GameState.activeSlotsCount >= 6;
-        const slotCost = [0, 0, 200, 600, 1800, 5000, 15000][GameState.activeSlotsCount + 1] || 999999;
-        list.innerHTML += this.upgCardHTML("🏪 More Offer Cards", maxSlots ? "Fully Upgraded" : `Active slots: ${GameState.activeSlotsCount} → ${GameState.activeSlotsCount + 1}`, maxSlots, slotCost, "GameApp.buySlot(event)");
-
-        // Warehouse
-        const maxWH = GameState.maxInventoryStack >= 999;
-        const whNext = GameState.maxInventoryStack === 99 ? 199 : (GameState.maxInventoryStack === 199 ? 499 : 999);
-        const whCost = GameState.maxInventoryStack === 99 ? 300 : (GameState.maxInventoryStack === 199 ? 1200 : 4500);
-        list.innerHTML += this.upgCardHTML("📦 Expand Warehouse", maxWH ? "Fully Upgraded" : `Max Stack: ${GameState.maxInventoryStack} → ${whNext}`, maxWH, whCost, `GameApp.buyWarehouse(${whNext}, ${whCost}, event)`);
-
+        
         // --- NEW: Market Tier Upgrade ---
         const tierCosts = [500, 2000, 8000, 30000, 100000];
         const isMaxTier = GameState.maxMarketTier >= 5;
@@ -601,7 +691,16 @@ const GameApp = {
 
     buySlot(e) {
         const cost = [0, 0, 200, 600, 1800, 5000, 15000][GameState.activeSlotsCount + 1];
-        if (GameState.gold >= cost) { GameState.gold -= cost; GameState.activeSlotsCount++; this.onUpgSuccess(e); GameState.offers.push(this.createRandomOffer(GameState.activeSlotsCount-1)); GameState.save(); }
+        if (GameState.gold >= cost) { 
+            GameState.gold -= cost; 
+            GameState.activeSlotsCount++; 
+            this.onUpgSuccess(e); 
+            GameState.offers.push(this.createRandomOffer(GameState.activeSlotsCount-1));
+            this.renderMarket();
+            GameState.save();
+
+            }
+        
         else { SoundFX.playError(); this.showToast("Not enough gold!"); }
     },
     buyWarehouse(next, cost, e) {
@@ -671,4 +770,4 @@ const GameApp = {
 };
 
 // Initialize App
-window.onload = () => GameApp.init();
+window.onload = () => GameApp.init(); 

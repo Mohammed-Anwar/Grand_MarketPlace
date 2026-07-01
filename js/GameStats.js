@@ -10,7 +10,7 @@ const GameState = {
     activeSlotsCount: 1, 
     maxInventoryStack: 99, 
     selectedInventoryItem: null,
-    offerCooldowns: 5, // 10 seconds cooldown for each offer after a trade
+    offerCooldowns: 10, // 10 seconds cooldown for each offer after a trade
     totalTrades: 0,
     totalCrafts: 0,
     netWorth: 50,
