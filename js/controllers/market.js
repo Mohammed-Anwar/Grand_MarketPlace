@@ -181,6 +181,19 @@ export const MarketController = {
             let nameStr = offer.stars === 'enchanted' ? `Enchanted ${prod.name} ✨` : prod.name;
             let isRareClass = offer.stars === 'enchanted' ? 'enchanted' : (offer.stars >= 4 ? 'rare' : '');
             
+            // --- VALIDATE TRADE TRANSACTION ---
+            const totalCost = offer.pricePerUnit * offer.qty;
+            const key = `${offer.productKey}_${offer.stars}`;
+            let canTrade = true;
+
+            if (offer.type === 'BUY') {
+                const hasGold = GameState.gold >= totalCost;
+                const hasSpace = (GameState.getInventoryCount(key) + offer.qty) <= GameState.maxInventoryStack;
+                canTrade = hasGold && hasSpace;
+            } else { // SELL
+                canTrade = GameState.getInventoryCount(key) >= offer.qty;
+            }
+            
             list.innerHTML += `
                 <div class="market-item ${offer.type === 'SELL' ? 'sell-deal' : ''} ${isRareClass}">
                     <div class="market-item-icon" style="position: relative;">
@@ -195,7 +208,9 @@ export const MarketController = {
                         <div class="market-item-price">${offer.pricePerUnit}</div>
                         <div class="market-item-total">Total: ${offer.pricePerUnit * offer.qty}</div>
                     </div>
-                    <button class="btn-trade ${offer.type.toLowerCase()}" onclick="GameApp.executeTrade(${idx}, event)">
+                    <button class="btn-trade ${offer.type.toLowerCase()} ${!canTrade ? 'disabled' : ''}" 
+                            ${!canTrade ? 'disabled' : ''} 
+                            onclick="GameApp.executeTrade(${idx}, event)">
                         ${offer.type === 'BUY' ? 'Buy Pack' : 'Sell Pack'}
                     </button>
                 </div>`;
@@ -204,15 +219,19 @@ export const MarketController = {
         const maxSlots = GameState.activeSlotsCount >= 6;
         if (!maxSlots) {
             const slotCost = [0, 0, 200, 600, 1800, 5000, 15000][GameState.activeSlotsCount + 1] || 999999;
+            const canAffordSlot = GameState.gold >= slotCost;
+
             list.innerHTML += `
-                <div class="market-item upgrade-slot-card" style="cursor: pointer; border: 3px dashed #bda071; background: rgba(131, 83, 44, 0.25);" onclick="GameApp.buySlot(event)">
+                <div class="market-item upgrade-slot-card ${!canAffordSlot ? 'afford-disabled' : ''}" 
+                     style="cursor: ${canAffordSlot ? 'pointer' : 'not-allowed'}; border: 3px dashed #bda071; background: rgba(131, 83, 44, 0.25);" 
+                     ${canAffordSlot ? 'onclick="GameApp.buySlot(event)"' : ''}>
                     <div class="market-item-icon" style="background: transparent; border: 2px dashed #bda071; font-size: 24px;">➕</div>
                     <div class="market-item-info">
                         <div class="market-item-name" style="color: #fff;">🏪 Expand Market Slot</div>
                         <div style="font-size: 11px; color: #e8d5a8; font-weight: 600; margin-top: 2px;">Unlock Offer Card #${GameState.activeSlotsCount + 1}</div>
                     </div>
                     <div class="market-price-col"><div class="market-item-price">${slotCost}g</div></div>
-                    <button class="btn-trade buy" style="pointer-events: none;">Unlock</button>
+                    <button class="btn-trade buy ${!canAffordSlot ? 'disabled' : ''}" style="pointer-events: none;">Unlock</button>
                 </div>`;
         }
     },

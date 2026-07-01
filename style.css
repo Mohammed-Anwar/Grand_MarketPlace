@@ -366,6 +366,63 @@ body {
 .btn-trade.sell { background: linear-gradient(180deg, #e85d3a 0%, #c44020 100%); border-color: #7a2010; box-shadow: 0 3px 0 #7a2010; }
 .btn-trade:active { transform: translateY(3px); box-shadow: 0 0 0 !important; }
 
+.btn-trade.disabled, 
+.btn-trade[disabled] {
+    background: linear-gradient(180deg, #573c26 0%, #3a2514 100%) !important;
+    border-color: #26170b !important;
+    box-shadow: inset 0 4px 6px rgba(0, 0, 0, 0.6) !important; /* Makes it look pushed in/inactive */
+    color: #806148 !important;
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.5) !important;
+    cursor: not-allowed !important;
+    transform: none !important;
+    pointer-events: none;
+    filter: saturate(0.7);
+}
+
+/* Subtle icon/price adjustments inside an un-tradable card to show context */
+.market-item:has(.btn-trade.disabled) .market-item-price {
+    color: #bda071 !important; /* Dim the gold text slightly */
+    text-shadow: none !important;
+}
+
+/* Visual change for the entire slot expansion card container when locked */
+.upgrade-slot-card.afford-disabled {
+    border-color: #4a2d18 !important;
+    background: rgba(45, 25, 10, 0.4) !important;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5) !important;
+    opacity: 0.85;
+}
+
+.upgrade-slot-card.afford-disabled .market-item-icon {
+    border-color: #4a2d18 !important;
+    color: #6b4220 !important;
+}
+
+/* Disabled State for Upgrade Cards (Market Tier / Warehouse / Varieties) */
+.upgrade-card:has(.btn-upg[disabled]) {
+    opacity: 0.85;
+}
+
+/* Inactive Upgrade Buttons (Not yet affordable) */
+.btn-upg.disabled,
+.btn-upg[disabled]:not(.unlocked-completed) { 
+    background: linear-gradient(180deg, #704728 0%, #4a2d18 100%) !important;
+    border-color: #331c0e !important;
+    box-shadow: 0 2px 0 #211108 !important;
+    color: #a38268 !important;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.4) !important;
+    cursor: not-allowed !important;
+}
+
+/* Keep your existing look for completely maxed out upgrades so it still looks rewarding */
+.btn-upg[disabled]:not(.disabled) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #61ac18 !important;
+    cursor: default !important;
+}
+
 /* --- UPGRADES --- */
 .upgrade-card {
     border-radius: 14px;

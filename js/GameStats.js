@@ -3,7 +3,7 @@
     GAME STATE & LOGIC
 ==================================================================== */
 const GameState = {
-    gold: 500,
+    gold: 5000,
     soundEnabled: true,
     marketTierFilter: 0, // Current filter selection (0 to 5)
     maxMarketTier: 0,    // Maximum unlocked tier (0 to 5)

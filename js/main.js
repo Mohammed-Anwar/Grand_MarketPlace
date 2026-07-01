@@ -138,8 +138,15 @@ window.GameApp = {
             phaserEmitter.explode(30);
         }
     },
-    upgCardHTML(title, desc, isMax, cost, onclickCode) {
-        let btnHTML = isMax ? `<button class="btn-upg" disabled>Unlocked ✔</button>` : `<button class="btn-upg" onclick="${onclickCode}">${cost.toLocaleString()}g</button>`;
+    upgCardHTML(title, desc, isMax, cost, onclickCode, canAfford = true) {
+        let btnHTML = '';
+        if (isMax) {
+            btnHTML = `<button class="btn-upg unlocked-completed" disabled>Unlocked ✔</button>`;
+        } else {
+            const disabledAttr = !canAfford ? 'disabled' : '';
+            const disabledClass = !canAfford ? 'disabled' : '';
+            btnHTML = `<button class="btn-upg ${disabledClass}" ${disabledAttr} onclick="${onclickCode}">${cost.toLocaleString()}g</button>`;
+        }
         return `<div class="upgrade-card wood-panel"><div class="upg-info"><h4>${title}</h4><p>${desc}</p></div>${btnHTML}</div>`;
     },
     buyWarehouse(next, cost, e) {
