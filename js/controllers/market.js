@@ -121,7 +121,7 @@ export const MarketController = {
         cardEl.classList.add('flash-out');
 
         setTimeout(() => {
-            this.performTradeLogic(app, idx);
+            this.performTradeLogic(app, idx, e); 
             const newCard = document.querySelectorAll('.market-item')[idx];
             if (newCard) {
                 newCard.classList.add('flash-in');
@@ -130,7 +130,7 @@ export const MarketController = {
         }, 100);
     },
 
-    performTradeLogic(app, idx) {
+    performTradeLogic(app, idx, e) { 
         const offer = GameState.offers[idx];
         const totalCost = offer.pricePerUnit * offer.qty;
         const key = `${offer.productKey}_${offer.stars}`;
@@ -142,9 +142,16 @@ export const MarketController = {
         } else {
             GameState.gold += totalCost; 
             GameState.modifyInventory(key, -offer.qty);
+
+            if (e && e.clientX && e.clientY) {
+                app.spawnFloatingText(e.clientX, e.clientY, `+${totalCost}g`, '#ffd700');
+                if (typeof spawnPhaserFlyingCoin === 'function') {
+                    spawnPhaserFlyingCoin(e.clientX, e.clientY, totalCost);
+                }
+            }
         }
 
-        uiEventBridge(offer, totalCost); // Dispatches custom actions if necessary
+        uiEventBridge(offer, totalCost); 
         GameState.totalTrades++;
         offer.cooldownActive = true;
         offer.cooldownEndTime = Date.now() + (GameState.offerCooldowns * 1000);
