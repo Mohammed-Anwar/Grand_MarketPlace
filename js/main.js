@@ -4,7 +4,6 @@ import { UpgradesController } from './controllers/upgrades.js';
 
 window.GameApp = {
     currentTab: 'hub',
-    forgeBatchCount: 1,
     displayedGold: 0, 
     goldCounterInterval: null,
 
@@ -81,6 +80,12 @@ window.GameApp = {
 
     renderUpgrades() { UpgradesController.renderUpgrades(this); },
     buyMarketTier(e) { UpgradesController.buyMarketTier(this, e); },
+
+    // Integrated Forge Bridges
+    openForgeModal(key) { HubController.openForgeModal(key); },
+    closeForgeModal() { HubController.closeForgeModal(); },
+    adjustForgeBatch(dir) { HubController.adjustForgeBatch(dir); },
+    executeForge(e) { HubController.executeForge(this, e); },
 
     // --- ANIMATION & FX TIMELINES ---
     animateGoldCounter() {
@@ -188,56 +193,6 @@ window.GameApp = {
             localStorage.removeItem('grand_marketplace_save'); window.location.reload();
         }
     },
-
-    openForgeModal(key) {
-        this.forgeBatchCount = 1;
-        const parts = key.split('_'); const pKey = parts[0]; const stars = parts[1];
-        const prod = GameState.products[pKey];
-        const nextStars = stars === '5' ? 'enchanted' : (parseInt(stars) + 1).toString();
-        const colors = ['', 'tier-1', 'tier-2', 'tier-3', 'tier-4', 'tier-5'];
-
-        // 🌟 CHANGE 1: Use the Phaser HTML sprite for the Source Item
-        document.getElementById('f-src-emoji').innerHTML = getPhaserSpriteHTML('food-items', prod.frameId);
-        document.getElementById('f-src-stars').innerHTML = stars === 'enchanted' ? '✨' : (stars > 0 ? '★' : '');
-        document.getElementById('f-src-stars').className = `f-stars stars ${stars === 'enchanted' ? 'enchanted' : (colors[stars] || '')}`;
-
-        // 🌟 CHANGE 2: Use the Phaser HTML sprite for the Destination Item
-        document.getElementById('f-dst-emoji').innerHTML = getPhaserSpriteHTML('food-items', prod.frameId);
-        document.getElementById('f-dst-stars').innerHTML = nextStars === 'enchanted' ? '✨' : '★';
-        document.getElementById('f-dst-stars').className = `f-stars stars ${nextStars === 'enchanted' ? 'enchanted' : colors[nextStars]}`;
-
-        this.updateForgeMath(key, prod, nextStars);
-        document.getElementById('forge-modal').style.display = 'flex';
-    },
-    closeForgeModal() { document.getElementById('forge-modal').style.display = 'none'; },
-    adjustForgeBatch(dir) {
-        const key = GameState.selectedInventoryItem;
-        const max = Math.floor(GameState.getInventoryCount(key) / 9);
-        if (dir === -1 && this.forgeBatchCount > 1) { SoundFX.playClick(); this.forgeBatchCount--; }
-        else if (dir === 1 && this.forgeBatchCount < max) { SoundFX.playClick(); this.forgeBatchCount++; }
-        else { SoundFX.playError(); return; }
-        
-        const parts = key.split('_'); 
-        this.updateForgeMath(key, GameState.products[parts[0]], parts[1] === '5' ? 'enchanted' : (parseInt(parts[1]) + 1).toString());
-    },
-    updateForgeMath(key, prod, nextStars) {
-        document.getElementById('forge-batch-count').innerText = this.forgeBatchCount;
-        const destKey = `${key.split('_')[0]}_${nextStars}`;
-        document.getElementById('forge-math-text').innerHTML = `Consume: ${this.forgeBatchCount * 9}x ${GameState.getItemName(key, true)}<br>Produce: ${this.forgeBatchCount}x ${GameState.getItemName(destKey, true)}`;
-    },
-    executeForge(e) {
-        const key = GameState.selectedInventoryItem;
-        const parts = key.split('_'); const destKey = `${parts[0]}_${parts[1] === '5' ? 'enchanted' : (parseInt(parts[1]) + 1).toString()}`;
-        if (GameState.getInventoryCount(destKey) + this.forgeBatchCount > GameState.maxInventoryStack) { SoundFX.playError(); this.showToast("Destination stack full!"); return; }
-
-        GameState.modifyInventory(key, -(this.forgeBatchCount * 9));
-        GameState.modifyInventory(destKey, this.forgeBatchCount);
-        GameState.totalCrafts++;
-        if (GameState.getInventoryCount(key) <= 0) GameState.selectedInventoryItem = null;
-        
-        this.triggerForgeExplosion(); SoundFX.playForge();
-        GameState.save(); this.closeForgeModal(); this.refreshUI();
-    }
 };
 
 // Start initialization once the engine finishes mounting window bindings
