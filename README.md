@@ -34,6 +34,7 @@ This web prototype introduces several massive systems that completely transform 
 * **Responsive Hybrid UI:** A fully custom layout built from scratch to seamlessly adapt between desktop monitors and mobile phone viewports.
 * **Pure Web Accessibility:** Built entirely in HTML5/JS, making the prototype instantly playable on any browser, anywhere, without downloads.
 
+**Try it now online:** [Play from Github pages](https://mohammed-anwar.github.io/Grand_MarketPlace/) 💰
 ---
 
 ## 🛠️ Technical Architecture & Systems Breakdown
