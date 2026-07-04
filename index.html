@@ -25,7 +25,17 @@
                     <h1>The Grand Marketplace</h1>
                     <div class="gold-bal" id="header-gold">💰 Balance: 50g</div>
                 </div>
-                <button class="btn-menu mobile-menu-btn" onclick="GameApp.openMenuModal()">⚙️ Menu</button>
+                <!-- Mobile Task Widget Trigger Button -->
+                <button class="mobile-task-badge" onclick="GameApp.openTaskModal()">
+                    <span id="mobile-task-text">🎯 Goal: Loading...</span>
+                </button>
+                <button class="btn-menu mobile-menu-btn" onclick="GameApp.openMenuModal()">⚙️</button>
+            </div>
+            
+            <!-- PC Task Progression Container Box -->
+            <div class="desktop-task-panel wood-panel" onclick="GameApp.openTaskModal()">
+                <div class="green-ribbon">CURRENT GOAL</div>
+                <p id="desktop-task-desc">Loading tracking systems...</p>
             </div>
 
             <div class="screen-tabs">
@@ -61,7 +71,7 @@
 
                     <div class="forge-footer">
                         <div class="forge-footer-info" id="forge-selection-text">Select an item in warehouse</div>
-                        <button class="btn-forge" id="btn-open-forge" disabled>🔨 Forge</button>
+                        <button class="btn-forge" id="btn-open-forge" data-require-task="2" disabled>🔨 Forge</button>
                         <button class="btn-forge" id="btn-open-quicksell" disabled onclick="GameApp.openQuickSellModal(); SoundFX.playClick()">💰 Quick Sell</button>
                     </div>
                 </div>
@@ -69,7 +79,7 @@
                 <!-- VIEW: MARKET -->
                 <div class="view" id="view-market">
                     <div class="market-info-bar">
-                        <button id="btn-market-tier" class="btn-shuffle"  onclick="GameApp.cycleMarketTier()">
+                        <button id="btn-market-tier" class="btn-shuffle" data-require-task="1" onclick="GameApp.cycleMarketTier()">
                             🔍 Tier: 0/0
                         </button>
                         <button class="refresh-btn" onclick="GameApp.shuffleMarket()">↻ Shuffle (-10g)</button>
@@ -197,6 +207,21 @@
 
     <!-- TOAST ALERTS -->
     <div id="toast-container"></div>
+    
+    
+    <!-- 🖼️ UNIVERSAL msg OVERLAY -->
+    <div id="game-msg-overlay" class="msg-overlay hidden" onclick="GameApp.closeModal(event)">
+        <div class="msg-card wood-panel">
+            <button class="msg-close-btn" onclick="GameApp.closeModal(event, force=true)">✕</button>
+            <div id="msg-header-ribbon" class="green-ribbon">OBJECTIVE</div>
+            <div class="msg-content">
+                <h2 id="msg-title">🎯 Current Objective</h2>
+                <div class="msg-divider"></div>
+                <p id="msg-body">Task text goes here...</p>
+            </div>
+        </div>
+    </div>
+
     <script src="js/PhaserConfig.js"></script>
     <script src="js/audio.js"></script>
     <script src="js/GameStats.js"></script>

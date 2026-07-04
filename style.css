@@ -512,15 +512,197 @@ body {
 .btn-execute { background: linear-gradient(180deg, #e85d3a 0%, #c44020 100%); border: 2px solid #7a2010; box-shadow: 0 4px 0 #7a2010; color: #fff; width: 100%; padding: 14px; border-radius: 12px; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; }
 .btn-execute:active { transform: translateY(4px); box-shadow: 0 0 0 #7a2010; }
 
-/* --- TOASTS --- */
-#toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; pointer-events: none; }
-.toast { background: #e85d3a; border: 2px solid #7a2010; color: white; padding: 10px 20px; border-radius: 12px; font-size: 13px; font-weight: 700; box-shadow: 0 4px 0 rgba(0,0,0,0.3); margin-top: 10px; animation: slideUp 0.3s ease; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+/* --- TOASTS CORE --- */
+#toast-container { 
+    position: fixed; 
+    bottom: 30px; 
+    left: 50%; 
+    transform: translateX(-50%); 
+    z-index: 2000; 
+    pointer-events: none; 
+    display: flex;
+    flex-direction: column-reverse; /* Newest toasts appear at the bottom, pushing old ones up */
+}
+
+.toast { 
+    padding: 10px 20px; 
+    border-radius: 12px; 
+    font-size: 13px; 
+    font-weight: 700; 
+    margin-top: 10px; 
+    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Added a slight bounce pop */
+}
+
+/* ❌ ERROR VARIANT (Your original aesthetic) */
+.toast-error {
+    background: #e85d3a; 
+    border: 2px solid #7a2010; 
+    color: white; 
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3); 
+}
+
+/* ✨ SUCCESS VARIANT (Gold & Green Milestone Palette) */
+.toast-success {
+    background: #2e6f40; /* Solid Forest Green */
+    border: 2px solid #ffd700; /* Brilliant Gold Rim */
+    color: #fff5df; 
+    box-shadow: 0 4px 0 #1b4427, 0 0 15px rgba(255, 215, 0, 0.4); /* Neon gold glow drop-shadow */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes slideUp { 
+    from { opacity: 0; transform: translateY(20px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* --- msg SYSTEM --- */
+.msg-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensures it sits above Phaser canvas */
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+.msg-overlay.hidden {
+    display: none;
+    opacity: 0;
+}
+
+.msg-card {
+    position: relative;
+    width: 90%;
+    max-width: 420px;
+    background-color: #4a301c; /* Deep wood background */
+    border: 4px solid #bda071;
+    border-radius: 12px;
+    padding: 30px 20px 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    animation: modalSlideDown 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.msg-content {
+    text-align: center;
+    color: #fff5df;
+}
+
+.msg-content h2 {
+    color: #ffd700;
+    font-size: 20px;
+    margin: 10px 0 5px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.msg-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #bda071, transparent);
+    margin: 12px auto;
+    width: 80%;
+}
+
+#msg-body {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #fff5df;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+}
+
+/* Close UI Controls */
+.msg-close-btn {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    background: #c23a3a;
+    border: 2px solid #fff5df;
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: transform 0.1s;
+}
+.msg-close-btn:hover { transform: scale(1.1); }
+
+/* Custom Overrides for Ribbon Positioning inside Card */
+.msg-card .green-ribbon {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+}
+
+/* Simple Entrance Keyframes */
+@keyframes msgSlideDown {
+    from { transform: translateY(-30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* --- TASKS COMPONENT STYLING --- */
+.mobile-task-badge {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.25);
+    border: 2px solid #bda071;
+    border-radius: 10px;
+    padding: 6px 10px;
+    font-family: inherit;
+    color: #ffd700;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.desktop-task-panel {
+    display: none; /* Hidden on mobile viewports */
+    padding: 24px 14px 14px;
+    text-align: center;
+    cursor: pointer;
+    background-color: #614024;
+    transition: transform 0.1s, filter 0.1s;
+}
+
+.desktop-task-panel:hover {
+    filter: brightness(1.1);
+}
+
+.desktop-task-panel p {
+    font-size: 13px;
+    color: #fff5df;
+    font-weight: 600;
+    line-height: 1.4;
+}
 
 /* --- RESPONSIVE LAYOUT BASE --- */
 .desktop-menu-btn { display: none; }
 .desktop-view-title { display: none; }
 .views-scroll-area { height: 100%; }
+
+/* --- RESPONSIVE ADAPTATIONS --- */
+@media (max-width: 767px) {
+    .header {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .header-text h1 { display: none; } /* Saves space for task banner */
+}
 
 /* --- DESKTOP UI OVERRIDES --- */
 @media (min-width: 768px) {
@@ -538,7 +720,7 @@ body {
         display: flex;
         flex-direction: column;
         justify-content: center;
-        gap: 10%;
+        gap: 7%;
     }
 
     .mobile-menu-btn { display: none; }
@@ -595,5 +777,13 @@ body {
     .modal-overlay {
         position: absolute; 
         border-radius: 20px;
+    }
+    .mobile-task-badge {
+        display: none; /* Hide standard inline bar on desktop environments */
+    }
+    .desktop-task-panel {
+        display: block; /* Show standalone wood tracker box in the sidebar array */
+        margin-top: auto; /* Pushes the widget down comfortably above the options button */
+        margin-bottom: 12px;
     }
 }

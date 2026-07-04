@@ -160,6 +160,7 @@ export const MarketController = {
         SoundFX.playTradeClick();
         GameState.updateNetWorth(); 
         GameState.save(); 
+        TaskEngine.checkProgression(app);
         app.refreshUI();
     },
 

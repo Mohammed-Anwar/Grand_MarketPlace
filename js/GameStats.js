@@ -1,4 +1,3 @@
-
 /* ====================================================================
     GAME STATE & LOGIC
 ==================================================================== */
@@ -121,53 +120,60 @@ const GameState = {
     inventory: { 'apple_0': 15 },
 
     save() {
-        const dataToSave = {
-            gold: this.gold, soundEnabled: this.soundEnabled, activeSlotsCount: this.activeSlotsCount, maxInventoryStack: this.maxInventoryStack,
-            totalTrades: this.totalTrades, totalCrafts: this.totalCrafts, inventory: this.inventory,
-            marketTierFilter: this.marketTierFilter,
-            maxMarketTier: this.maxMarketTier,
-            unlockedProducts: Object.keys(this.products).reduce((acc, key) => { acc[key] = this.products[key].unlocked; return acc; }, {}),
-            offers: this.offers.map(offer => ({
-                id: offer.id, type: offer.type, productKey: offer.productKey, stars: offer.stars, pricePerUnit: offer.pricePerUnit, qty: offer.qty,
-                cooldownActive: offer.cooldownActive, cooldownEndTime: offer.cooldownEndTime || 0
-            }))
-        };
-        localStorage.setItem('grand_marketplace_save', JSON.stringify(dataToSave));
-    },
+    const dataToSave = {
+        gold: this.gold, soundEnabled: this.soundEnabled, activeSlotsCount: this.activeSlotsCount, maxInventoryStack: this.maxInventoryStack,
+        totalTrades: this.totalTrades, totalCrafts: this.totalCrafts, inventory: this.inventory,
+        marketTierFilter: this.marketTierFilter,
+        maxMarketTier: this.maxMarketTier,
+        // 🎯 SAVE THE TASK INDEX HERE
+        currentTaskIndex: TaskEngine.currentTaskIndex, 
+        unlockedProducts: Object.keys(this.products).reduce((acc, key) => { acc[key] = this.products[key].unlocked; return acc; }, {}),
+        offers: this.offers.map(offer => ({
+            id: offer.id, type: offer.type, productKey: offer.productKey, stars: offer.stars, pricePerUnit: offer.pricePerUnit, qty: offer.qty,
+            cooldownActive: offer.cooldownActive, cooldownEndTime: offer.cooldownEndTime || 0
+        }))
+    };
+    localStorage.setItem('grand_marketplace_save', JSON.stringify(dataToSave));
+},
 
-    load() {
-        const savedData = localStorage.getItem('grand_marketplace_save');
-        if (!savedData) return false;
-        try {
-            const data = JSON.parse(savedData);
-            if (data.gold !== undefined) this.gold = data.gold;
-            if (data.soundEnabled !== undefined) this.soundEnabled = data.soundEnabled;
-            if (data.activeSlotsCount !== undefined) this.activeSlotsCount = data.activeSlotsCount;
-            if (data.maxInventoryStack !== undefined) this.maxInventoryStack = data.maxInventoryStack;
-            if (data.totalTrades !== undefined) this.totalTrades = data.totalTrades;
-            if (data.totalCrafts !== undefined) this.totalCrafts = data.totalCrafts;
-            if (data.inventory !== undefined) this.inventory = data.inventory;
-            if (data.marketTierFilter !== undefined) this.marketTierFilter = data.marketTierFilter;
-            if (data.maxMarketTier !== undefined) this.maxMarketTier = data.maxMarketTier;
+load() {
+    const savedData = localStorage.getItem('grand_marketplace_save');
+    if (!savedData) return false;
+    try {
+        const data = JSON.parse(savedData);
+        if (data.gold !== undefined) this.gold = data.gold;
+        if (data.soundEnabled !== undefined) this.soundEnabled = data.soundEnabled;
+        if (data.activeSlotsCount !== undefined) this.activeSlotsCount = data.activeSlotsCount;
+        if (data.maxInventoryStack !== undefined) this.maxInventoryStack = data.maxInventoryStack;
+        if (data.totalTrades !== undefined) this.totalTrades = data.totalTrades;
+        if (data.totalCrafts !== undefined) this.totalCrafts = data.totalCrafts;
+        if (data.inventory !== undefined) this.inventory = data.inventory;
+        if (data.marketTierFilter !== undefined) this.marketTierFilter = data.marketTierFilter;
+        if (data.maxMarketTier !== undefined) this.maxMarketTier = data.maxMarketTier;
 
-            if (data.unlockedProducts) {
-                for (let key in data.unlockedProducts) if (this.products[key]) this.products[key].unlocked = data.unlockedProducts[key];
-            }
+        // 🎯 LOAD THE TASK INDEX HERE BEFORE DRAWING THE ENGINE
+        if (data.currentTaskIndex !== undefined) {
+            TaskEngine.currentTaskIndex = data.currentTaskIndex;
+        }
 
-            if (data.offers) {
-                const now = Date.now();
-                this.offers = data.offers.map(offer => {
-                    let timer = 0; let active = offer.cooldownActive;
-                    if (active && offer.cooldownEndTime) {
-                        const remaining = Math.ceil((offer.cooldownEndTime - now) / 1000);
-                        if (remaining <= 0) active = false; else timer = remaining;
-                    }
-                    return { ...offer, cooldownActive: active, cooldownTimer: timer };
-                });
-            }
-            this.updateNetWorth(); return true;
-        } catch (e) { return false; }
-    },
+        if (data.unlockedProducts) {
+            for (let key in data.unlockedProducts) if (this.products[key]) this.products[key].unlocked = data.unlockedProducts[key];
+        }
+
+        if (data.offers) {
+            const now = Date.now();
+            this.offers = data.offers.map(offer => {
+                let timer = 0; let active = offer.cooldownActive;
+                if (active && offer.cooldownEndTime) {
+                    const remaining = Math.ceil((offer.cooldownEndTime - now) / 1000);
+                    if (remaining <= 0) active = false; else timer = remaining;
+                }
+                return { ...offer, cooldownActive: active, cooldownTimer: timer };
+            });
+        }
+        this.updateNetWorth(); return true;
+    } catch (e) { return false; }
+},
 
     getItemName(key, asHTML = false) {
         const parts = key.split('_'); const prod = this.products[parts[0]];
